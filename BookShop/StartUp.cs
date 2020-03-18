@@ -12,7 +12,7 @@
         {
             using (var db = new BookShopContext())
             {
-                var result = GetBooksByAgeRestriction(db, "Adult");
+                var result = GetGoldenBooks(db);
                 Console.WriteLine(result);
             }
         }
@@ -32,6 +32,23 @@
             return result;        
         }
 
-       
+        public static string GetGoldenBooks(BookShopContext context)
+        {
+            var command = "Gold";
+            var editionType = Enum.Parse<EditionType>(command, true);
+
+            var books = context.Books
+                .Where(b => b.EditionType == editionType && b.Copies < 5000 )
+                .OrderBy(x => x.BookId)
+                .Select(t => t.Title)
+                .ToList();
+
+            var result = string.Join(Environment.NewLine, books);
+
+            return result;
+
+        }
+
+
     }
 }
