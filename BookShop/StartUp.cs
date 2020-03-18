@@ -14,7 +14,7 @@
         {
             using (var context = new BookShopContext())
             {
-                var result = GetBooksByAuthor(context, "po");
+                var result = CountBooks(context, 12);
                 Console.WriteLine(result);
             }
         }
@@ -168,7 +168,12 @@
             return result;
         }
 
-
+        public static int CountBooks(BookShopContext context, int lengthCheck)
+        {
+            return context.Books
+                .Count(t => t.Title.Length > lengthCheck);
+        
+        }
 
 
     }
