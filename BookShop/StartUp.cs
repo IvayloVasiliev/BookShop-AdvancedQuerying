@@ -12,7 +12,7 @@
         {
             using (var db = new BookShopContext())
             {
-                var result = GetGoldenBooks(db);
+                var result = GetBooksByCategory(db, "horror mystery drama");
                 Console.WriteLine(result);
             }
         }
@@ -34,8 +34,8 @@
 
         public static string GetGoldenBooks(BookShopContext context)
         {
-            var command = "Gold";
-            var editionType = Enum.Parse<EditionType>(command, true);
+           
+            var editionType = Enum.Parse<EditionType>("Gold");
 
             var books = context.Books
                 .Where(b => b.EditionType == editionType && b.Copies < 5000 )
@@ -49,6 +49,49 @@
 
         }
 
+        public static string GetBooksByPrice(BookShopContext context)
+        {
+            var books = context.Books
+                .Where(b => b.Price > 40)
+                .OrderByDescending(x => x.Price)
+                .Select(t => t.Title)
+                .ToList();
+
+            var result = string.Join(Environment.NewLine, books);
+
+            return result;
+        }
+
+        public static string GetBooksNotReleasedIn(BookShopContext context, int year)
+        {
+            //TODO
+            var releaseDate = new DateTime(year);
+
+            var books = context.Books
+                .Where(d => d.ReleaseDate != releaseDate)
+                .Select(t => t.Title)
+                .OrderBy(x => x)
+                .ToList();
+
+            var result = string.Join(Environment.NewLine, books);
+
+            return result;
+        }
+
+        public static string GetBooksByCategory(BookShopContext context, string input)
+        {
+            string[] categories = input.ToLower().Split(" ", StringSplitOptions.RemoveEmptyEntries);
+
+            var books = context.Books
+                .Where(bc => bc.BookCategories.Any(c => categories.Contains(c.Category.Name.ToLower())))
+                .Select(t => t.Title)
+                .OrderBy(t => t)
+                .ToList();
+
+            var result = string.Join(Environment.NewLine, books);
+
+            return result;
+        }
 
     }
 }
