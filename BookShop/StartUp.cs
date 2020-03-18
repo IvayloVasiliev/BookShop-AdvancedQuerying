@@ -13,7 +13,7 @@
         {
             using (var context = new BookShopContext())
             {
-                var result = GetAuthorNamesEndingIn(context, "e");
+                var result = GetBookTitlesContaining(context, "WOR");
                 Console.WriteLine(result);
             }
         }
@@ -134,13 +134,24 @@
 
         }
 
+        public static string GetBookTitlesContaining(BookShopContext context, string input)
+        {
+            var books = context.Books
+                .Where(b => b.Title.Contains(input))
+                .Select(t => t.Title)
+                .OrderBy(x => x)
+                .ToList();
 
+            var result = string.Join(Environment.NewLine, books);
+
+            return result;
+        }
 
         //public static string GetBooksByAuthor(BookShopContext context, string input)
         //{ 
-            
-        
-        
+
+
+
         //}
 
     }
