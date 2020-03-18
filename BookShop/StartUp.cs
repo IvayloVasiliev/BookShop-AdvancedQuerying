@@ -3,6 +3,7 @@
     using BookShop.Models.Enums;
     using Data;
     using Initializer;
+    using Microsoft.EntityFrameworkCore;
     using System;
     using System.Globalization;
     using System.Linq;
@@ -13,7 +14,7 @@
         {
             using (var context = new BookShopContext())
             {
-                var result = GetBookTitlesContaining(context, "WOR");
+                var result = GetBooksByAuthor(context, "po");
                 Console.WriteLine(result);
             }
         }
@@ -147,12 +148,28 @@
             return result;
         }
 
-        //public static string GetBooksByAuthor(BookShopContext context, string input)
-        //{ 
+        public static string GetBooksByAuthor(BookShopContext context, string input)
+        {
+
+            var books = context.Books
+                .Where(a => EF.Functions.Like(a.Author.LastName, $"{input}%"))
+                .OrderBy(i => i.BookId)
+                .Select(x => new
+                {
+                    x.Title,
+                    x.Author.FirstName,
+                    x.Author.LastName
+                })
+                .ToList();
+
+            string result = string.Join(Environment.NewLine, books.Select(x => $"{x.Title} " +
+            $"({x.FirstName} {x.LastName})"));
+
+            return result;
+        }
 
 
 
-        //}
 
     }
 }
