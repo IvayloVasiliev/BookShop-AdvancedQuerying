@@ -4,6 +4,7 @@
     using Data;
     using Initializer;
     using System;
+    using System.Globalization;
     using System.Linq;
 
     public class StartUp
@@ -12,7 +13,7 @@
         {
             using (var db = new BookShopContext())
             {
-                var result = GetBooksByCategory(db, "horror mystery drama");
+                var result = GetBooksByPrice(db);
                 Console.WriteLine(result);
             }
         }
@@ -54,23 +55,25 @@
             var books = context.Books
                 .Where(b => b.Price > 40)
                 .OrderByDescending(x => x.Price)
-                .Select(t => t.Title)
+                .Select(x => new 
+                {
+                    x.Title,
+                    x.Price
+                })
                 .ToList();
-
-            var result = string.Join(Environment.NewLine, books);
+           
+            var result = string.Join(Environment.NewLine, books.Select(x=> $"{x.Title} - ${x.Price:F2}"));
 
             return result;
         }
 
         public static string GetBooksNotReleasedIn(BookShopContext context, int year)
         {
-            //TODO
-            var releaseDate = new DateTime(year);
 
             var books = context.Books
-                .Where(d => d.ReleaseDate != releaseDate)
+                .Where(d => d.ReleaseDate.Value.Year != year)
+                .OrderBy(x => x.BookId)
                 .Select(t => t.Title)
-                .OrderBy(x => x)
                 .ToList();
 
             var result = string.Join(Environment.NewLine, books);
@@ -89,6 +92,27 @@
                 .ToList();
 
             var result = string.Join(Environment.NewLine, books);
+
+            return result;
+        }
+
+        public static string GetBooksReleasedBefore(BookShopContext context, string date)
+        {
+            var targetDate = DateTime.ParseExact(date, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+
+            var books = context.Books
+                .Where(d => d.ReleaseDate.Value < targetDate)
+                .OrderByDescending(r => r.ReleaseDate.Value)
+                .Select(x => new
+                {
+                    x.Title,
+                    x.EditionType,
+                    x.Price
+                })
+                .ToList();
+
+            string result = string.Join(Environment.NewLine, books.Select(x=> $"{x.Title} - {x.EditionType}" +
+            $" - ${x.Price:F2}"));
 
             return result;
         }
