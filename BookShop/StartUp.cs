@@ -14,7 +14,7 @@
         {
             using (var context = new BookShopContext())
             {
-                var result = CountBooks(context, 12);
+                var result = CountCopiesByAuthor(context);
                 Console.WriteLine(result);
             }
         }
@@ -171,10 +171,25 @@
         public static int CountBooks(BookShopContext context, int lengthCheck)
         {
             return context.Books
-                .Count(t => t.Title.Length > lengthCheck);
-        
+                .Count(t => t.Title.Length > lengthCheck);       
         }
 
+        public static string CountCopiesByAuthor(BookShopContext context)
+        {
+            var authors = context.Authors
+                   .Select(x => new
+                   {
+                       FullName = x.FirstName + " " + x.LastName,
+                       BooksCount = x.Books.Sum(c => c.Copies)
+                   })
+                   .OrderByDescending(b=>b.BooksCount)
+                   .ToList();
+
+            string result = string.Join(Environment.NewLine, authors.Select(x => $"{x.FullName} - " +
+            $"{x.BooksCount}"));
+
+            return result;
+        }
 
     }
 }
