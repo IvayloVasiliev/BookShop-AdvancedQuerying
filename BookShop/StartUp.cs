@@ -11,9 +11,9 @@
     {
         public static void Main()
         {
-            using (var db = new BookShopContext())
+            using (var context = new BookShopContext())
             {
-                var result = GetBooksByPrice(db);
+                var result = GetAuthorNamesEndingIn(context, "e");
                 Console.WriteLine(result);
             }
         }
@@ -116,6 +116,32 @@
 
             return result;
         }
+
+        public static string GetAuthorNamesEndingIn(BookShopContext context, string input)
+        {
+            var authors = context.Authors
+                .Where(fn => fn.FirstName.EndsWith(input))
+                .OrderBy(x=>x)
+                .Select(x => new
+                {
+                    FullName = x.FirstName + " " + x.LastName
+                })
+                .ToList();
+
+            string result = string.Join(Environment.NewLine, authors.Select(x => $"{x.FullName}"));
+
+            return result;
+
+        }
+
+
+
+        //public static string GetBooksByAuthor(BookShopContext context, string input)
+        //{ 
+            
+        
+        
+        //}
 
     }
 }
