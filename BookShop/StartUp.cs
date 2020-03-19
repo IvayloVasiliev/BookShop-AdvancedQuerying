@@ -14,7 +14,7 @@
         {
             using (var context = new BookShopContext())
             {
-                var result = CountCopiesByAuthor(context);
+                var result = GetTotalProfitByCategory(context);
                 Console.WriteLine(result);
             }
         }
@@ -187,6 +187,24 @@
 
             string result = string.Join(Environment.NewLine, authors.Select(x => $"{x.FullName} - " +
             $"{x.BooksCount}"));
+
+            return result;
+        }
+
+        public static string GetTotalProfitByCategory(BookShopContext context)
+        {
+            var categories = context.Categories
+                .Select(x => new
+                {
+                    CategoryName = x.Name,
+                    TotalProfit = x.CategoryBooks.Sum(s=> s.Book.Price * s.Book.Copies)
+                })
+                .OrderByDescending(t=> t.TotalProfit)
+                .ThenBy(c=> c.CategoryName)
+                .ToList();
+
+            string result = string.Join(Environment.NewLine, categories.Select(x => $"{x.CategoryName} " +
+            $"${x.TotalProfit}"));
 
             return result;
         }
