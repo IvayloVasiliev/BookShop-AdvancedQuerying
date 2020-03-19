@@ -7,6 +7,7 @@
     using System;
     using System.Globalization;
     using System.Linq;
+    using System.Text;
 
     public class StartUp
     {
@@ -14,7 +15,7 @@
         {
             using (var context = new BookShopContext())
             {
-                var result = GetTotalProfitByCategory(context);
+                var result = GetMostRecentBooks(context);
                 Console.WriteLine(result);
             }
         }
@@ -209,5 +210,37 @@
             return result;
         }
 
+        public static string GetMostRecentBooks(BookShopContext context)
+        {
+            var categories = context.Categories
+                .Select(x => new
+                {
+                    CategoryName = x.Name,
+                    Books = x.CategoryBooks.Select(e => new
+                    {
+                        e.Book.Title,
+                        e.Book.ReleaseDate
+                    })
+                        .OrderByDescending(e => e.ReleaseDate)
+                        .Take(3)
+                        .ToList()
+                })
+                .OrderBy(c => c.CategoryName)
+                .ToList();
+
+            StringBuilder sb = new StringBuilder();
+
+            foreach (var category in categories)
+            {
+                sb.AppendLine($"--{ category.CategoryName}");
+
+                foreach (var book in category.Books)
+                {
+                    sb.AppendLine($"{book.Title} ({book.ReleaseDate.Value.Year})");
+                }
+            }
+
+            return sb.ToString().TrimEnd();
+        }
     }
 }
