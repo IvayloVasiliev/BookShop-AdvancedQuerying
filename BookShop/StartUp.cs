@@ -1,5 +1,6 @@
 ﻿namespace BookShop
 {
+    using BookShop.Models;
     using BookShop.Models.Enums;
     using Data;
     using Initializer;
@@ -8,6 +9,7 @@
     using System.Globalization;
     using System.Linq;
     using System.Text;
+    using Z.EntityFramework.Plus;
 
     public class StartUp
     {
@@ -15,7 +17,7 @@
         {
             using (var context = new BookShopContext())
             {
-                var result = GetMostRecentBooks(context);
+                var result = RemoveBooks(context);
                 Console.WriteLine(result);
             }
         }
@@ -242,5 +244,30 @@
 
             return sb.ToString().TrimEnd();
         }
+
+        //BULK Operation with Z.EntityFramework.Plus.EFCore
+        public static void IncreasePrices(BookShopContext context)
+        {
+            var books = context.Books
+                .Where(x => x.ReleaseDate.Value.Year < 2010)
+                .Update(x => new Book() { Price = x.Price + 5 });
+
+            context.SaveChanges();  
+        }
+
+        //BULK Operation with Z.EntityFramework.Plus.EFCore
+        public static int RemoveBooks(BookShopContext context)
+        {
+            var books = context.Books
+                .Where(c => c.Copies < 4200)
+                .Delete();
+
+            return books;       
+        }
+
+
+
+
+
     }
 }
